@@ -1,0 +1,15 @@
+name: electron
+version: 0.0.3+1
+description: Electron wrapper for dart
+author: GrimShield
+homepage: https://gitlab.com/grimshield/electron.dart
+
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+
+dependencies:
+  nodejs: '>=0.0.1 <0.1.0'
+  js: '>=0.6.0 <0.7.0'
+
+dev_dependencies:
+  test: '>=0.12.0 <0.13.0'
