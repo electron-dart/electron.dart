@@ -7,8 +7,10 @@ import "package:nodejs/nodejs.dart";
 
 import 'package:electron/src/both/native_image/native_image.dart';
 import 'package:electron/src/main/menu/menu.dart';
+import 'package:electron/src/main/session/session.dart';
 
 part 'options.dart';
+part 'web_preferences_option.dart';
 
 @JS()
 @anonymous

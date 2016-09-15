@@ -42,7 +42,7 @@ class BrowserWindowOptions {
       String type,
       String titleBarStyle,
       bool thickFrame,
-      Object webPreferences
+      WebPreferencesOption webPreferences
       });
 
   /// Window’s width in pixels. Default is 800
@@ -182,5 +182,7 @@ class BrowserWindowOptions {
   external bool get thickFrame;
 
   /// Settings of web page’s features. See more about this below.
-  external Object get webPreferences;
+  external WebPreferencesOption get webPreferences;
 }
+
+
