@@ -52,8 +52,8 @@ class LoadURLOptions {
 @JS()
 @anonymous
 class ProgressBarOptions {
-/// Mode for the progres bar (none, normal, indeterminate, error, or paused)
-String mode;
+  /// Mode for the progres bar (none, normal, indeterminate, error, or paused)
+  String mode;
 }
 
 @JS()
@@ -158,7 +158,8 @@ class NativeJsBrowserWindow extends NativeJsEventEmitter {
   /// arguments of 16/9 and [ 40, 50 ]. The second argument doesn’t care where
   /// the extra width and height are within the content view–only that they exist.
   /// Just sum any extra width and height areas you have within the overall content view.
-  external void setAspectRatio(double aspectRatio, [ AspectRatioExtraSize extraSize]);
+  external void setAspectRatio(double aspectRatio,
+      [AspectRatioExtraSize extraSize]);
 
   /// Resizes and moves the window to width, height, x, y.
   external void setBounds(Bounds options, [bool animate]);
@@ -440,9 +441,46 @@ class NativeJsBrowserWindow extends NativeJsEventEmitter {
 const BrowserWindowOptions defaultBrowserWindowOptions =
     const BrowserWindowOptions();
 
+class EventEmitterGlue<T> {
+  EventEmitter _emitter;
+
+  StreamController<T> _controller;
+
+  EventEmitterGlue(this._emitter, String event, [Function callback]) {
+    _controller = new StreamController<T>(sync: true);
+    if (callback is Function) {
+      _emitter.on(event, callback);
+    } else {
+      _emitter.on(event, defConverter);
+    }
+  }
+
+  void defConverter([a, b, c, d]) {
+    add();
+  }
+
+  void add([T el]) {
+    _controller.add(el);
+  }
+
+  Future<Null> destroy() async {
+    await _controller.close();
+  }
+
+  Stream<T> get stream => _controller.stream;
+}
+
 class BrowserWindow extends EventEmitter {
-  BrowserWindow([BrowserWindowOptions options = defaultBrowserWindowOptions]) {
-    _nativeJs = new NativeJsBrowserWindow(options);
+  factory BrowserWindow(
+      [BrowserWindowOptions options = defaultBrowserWindowOptions]) {
+    return new BrowserWindow.fromNativeJsBrowserWindow(
+        new NativeJsBrowserWindow(options));
+  }
+
+  BrowserWindow.fromNativeJsBrowserWindow(NativeJsBrowserWindow window)
+      : super.fromNativeJsEventEmitter(window) {
+    _nativeJs = window;
+
     _initAllStreamController();
   }
 
@@ -450,16 +488,158 @@ class BrowserWindow extends EventEmitter {
 
   NativeJsBrowserWindow get nativeJs => _nativeJs;
 
-  StreamController<Null> _closed;
+  EventEmitterGlue<Null> _pageTitleUpdated;
+
+  Stream<Null> get onPageTitleUpdated => _pageTitleUpdated.stream;
+
+  EventEmitterGlue<Null> _close;
+
+  Stream<Null> get onClose => _close.stream;
+
+  EventEmitterGlue<Null> _closed;
 
   Stream<Null> get onClosed => _closed.stream;
 
-  void _initAllStreamController() {
-    _closed = new StreamController<Null>(sync: true);
-    on('closed', _onClosed);
-  }
+  EventEmitterGlue<Null> _unresponsive;
 
-  void _onClosed([dynamic event]) => _closed.add(null);
+  Stream<Null> get onUnresponsive => _unresponsive.stream;
+
+  EventEmitterGlue<Null> _responsive;
+
+  Stream<Null> get onResponsive => _responsive.stream;
+
+  EventEmitterGlue<Null> _blur;
+
+  Stream<Null> get onBlur => _blur.stream;
+
+  EventEmitterGlue<Null> _focus;
+
+  Stream<Null> get onFocus => _focus.stream;
+
+  EventEmitterGlue<Null> _show;
+
+  Stream<Null> get onShow => _show.stream;
+
+  EventEmitterGlue<Null> _hide;
+
+  Stream<Null> get onHide => _hide.stream;
+
+  EventEmitterGlue<Null> _readyToShow;
+
+  Stream<Null> get onReadyToShow => _readyToShow.stream;
+
+  EventEmitterGlue<Null> _maximize;
+
+  Stream<Null> get onMaximize => _maximize.stream;
+
+  EventEmitterGlue<Null> _unmaximize;
+
+  Stream<Null> get onUnmaximize => _unmaximize.stream;
+
+  EventEmitterGlue<Null> _minimize;
+
+  Stream<Null> get onMinimize => _minimize.stream;
+
+  EventEmitterGlue<Null> _restore;
+
+  Stream<Null> get onRestore => _restore.stream;
+
+  EventEmitterGlue<Null> _resize;
+
+  Stream<Null> get onResize => _resize.stream;
+
+  EventEmitterGlue<Null> _move;
+
+  Stream<Null> get onMove => _move.stream;
+
+  EventEmitterGlue<Null> _moved;
+
+  Stream<Null> get onMoved => _moved.stream;
+
+  EventEmitterGlue<Null> _enterFullScreen;
+
+  Stream<Null> get onEnterFullScreen => _enterFullScreen.stream;
+
+  EventEmitterGlue<Null> _leaveFullScreen;
+
+  Stream<Null> get onLeaveFullScreen => _leaveFullScreen.stream;
+
+  EventEmitterGlue<Null> _enterHtmlFullScreen;
+
+  Stream<Null> get onEnterHtmlFullScreen => _enterHtmlFullScreen.stream;
+
+  EventEmitterGlue<Null> _leaveHtmlFullScreen;
+
+  Stream<Null> get onLeaveHtmlFullScreen => _leaveHtmlFullScreen.stream;
+
+  EventEmitterGlue<Null> _appCommand;
+
+  Stream<Null> get onAppCommand => _appCommand.stream;
+
+  EventEmitterGlue<Null> _scrollTouchBegin;
+
+  Stream<Null> get onScrollTouchBegin => _scrollTouchBegin.stream;
+
+  EventEmitterGlue<Null> _scrollTouchEnd;
+
+  Stream<Null> get onScrollTouchEnd => _scrollTouchEnd.stream;
+
+  EventEmitterGlue<Null> _swipe;
+
+  Stream<Null> get onSwipe => _swipe.stream;
+
+  void _initAllStreamController() {
+    _pageTitleUpdated = new EventEmitterGlue<Null>(this, "page-title-updated",
+        (dynamic a1, dynamic a2) => _pageTitleUpdated.add());
+
+    _close = new EventEmitterGlue<Null>(this, "close");
+
+    _closed = new EventEmitterGlue<Null>(this, "closed");
+
+    _unresponsive = new EventEmitterGlue<Null>(this, "unresponsive");
+
+    _responsive = new EventEmitterGlue<Null>(this, "responsive");
+
+    _blur = new EventEmitterGlue<Null>(this, "blur");
+
+    _focus = new EventEmitterGlue<Null>(this, "focus");
+
+    _show = new EventEmitterGlue<Null>(this, "show");
+
+    _hide = new EventEmitterGlue<Null>(this, "hide");
+
+    _readyToShow = new EventEmitterGlue<Null>(this, "ready-to-show");
+
+    _maximize = new EventEmitterGlue<Null>(this, "maximize");
+
+    _unmaximize = new EventEmitterGlue<Null>(this, "unmaximize");
+
+    _minimize = new EventEmitterGlue<Null>(this, "minimize");
+
+    _restore = new EventEmitterGlue<Null>(this, "restore");
+
+    _resize = new EventEmitterGlue<Null>(this, "resize");
+
+    _move = new EventEmitterGlue<Null>(this, "move");
+
+    _moved = new EventEmitterGlue<Null>(this, "moved");
+
+    _enterFullScreen = new EventEmitterGlue<Null>(this, "enter-full-screen");
+
+    _leaveFullScreen = new EventEmitterGlue<Null>(this, "leave-full-screen");
+
+    _enterHtmlFullScreen = new EventEmitterGlue<Null>(this, "enter-html-full-screen");
+
+    _leaveHtmlFullScreen = new EventEmitterGlue<Null>(this, "leave-html-full-screen");
+
+    _appCommand = new EventEmitterGlue<Null>(this, "app-command");
+
+    _scrollTouchBegin = new EventEmitterGlue<Null>(this, "scroll-touch-begin");
+
+    _scrollTouchEnd = new EventEmitterGlue<Null>(this, "scroll-touch-end");
+
+    _swipe = new EventEmitterGlue<Null>(this, "swipe");
+  }
 
   /// Force closing the window, the unload and beforeunload event won’t be emitted
   /// for the web page, and close event will also not be emitted for this window,
@@ -538,41 +718,48 @@ class BrowserWindow extends EventEmitter {
   /// arguments of 16/9 and [ 40, 50 ]. The second argument doesn’t care where
   /// the extra width and height are within the content view–only that they exist.
   /// Just sum any extra width and height areas you have within the overall content view.
-  void setAspectRatio(double aspectRatio, [ AspectRatioExtraSize extraSize]) => _nativeJs.setAspectRatio(aspectRatio, extraSize);
+  void setAspectRatio(double aspectRatio, [AspectRatioExtraSize extraSize]) =>
+      _nativeJs.setAspectRatio(aspectRatio, extraSize);
 
   /// Resizes and moves the window to width, height, x, y.
-  void setBounds(Bounds options, [bool animate]) => _nativeJs.setBounds(options, animate);
+  void setBounds(Bounds options, [bool animate]) =>
+      _nativeJs.setBounds(options, animate);
 
   /// Returns an object that contains window’s width, height, x and y values.
   Bounds getBounds() => _nativeJs.getBounds();
 
   /// Resizes and moves the window’s client area (e.g. the web page) to width, height, x, y.
-  void setContentBounds(Bounds options, [bool animate]) => _nativeJs.setContentBounds(options, animate);
+  void setContentBounds(Bounds options, [bool animate]) =>
+      _nativeJs.setContentBounds(options, animate);
 
   /// Returns an object that contains the window’s client area (e.g. the web page)
   /// width, height, x and y values.
   Bounds getContentBounds() => _nativeJs.getContentBounds();
 
   /// Resizes the window to width and height.
-  void setSize(int width, int height, [bool animate]) => _nativeJs.setSize(width, height, animate);
+  void setSize(int width, int height, [bool animate]) =>
+      _nativeJs.setSize(width, height, animate);
 
   /// Returns an array that contains window’s width and height.
   List<int> getSize() => _nativeJs.getSize();
 
   /// Resizes the window’s client area (e.g. the web page) to width and height.
-  void setContentSize(int width, int height, [bool animate]) => _nativeJs.setContentSize(width, height, animate);
+  void setContentSize(int width, int height, [bool animate]) =>
+      _nativeJs.setContentSize(width, height, animate);
 
   /// Returns an array that contains window’s client area’s width and height.
   List<int> getContentSize() => _nativeJs.getContentSize();
 
   /// Sets the minimum size of window to width and height.
-  void setMinimumSize(int width, int height) => _nativeJs.setMinimumSize(width, height);
+  void setMinimumSize(int width, int height) =>
+      _nativeJs.setMinimumSize(width, height);
 
   /// Returns an array that contains window’s minimum width and height.
   List<int> getMinimumSize() => _nativeJs.getMinimumSize();
 
   /// Sets the maximum size of window to width and height.
-  void setMaximumSize(int width, int height) => _nativeJs.setMaximumSize(width, height);
+  void setMaximumSize(int width, int height) =>
+      _nativeJs.setMaximumSize(width, height);
 
   /// Returns an array that contains window’s maximum width and height.
   List<int> getMaximumSize() => _nativeJs.getMaximumSize();
@@ -590,7 +777,8 @@ class BrowserWindow extends EventEmitter {
   bool isMovable() => _nativeJs.isMovable();
 
   /// Sets whether the window can be manually minimized by user. On Linux does nothing.
-  void setMinimizable(bool minimizable) => _nativeJs.setMinimizable(minimizable);
+  void setMinimizable(bool minimizable) =>
+      _nativeJs.setMinimizable(minimizable);
 
   /// Returns whether the window can be manually minimized by user. On Linux
   /// always returns true.
@@ -598,13 +786,15 @@ class BrowserWindow extends EventEmitter {
 
   /// Sets whether the window can be manually maximized by user. On Linux does
   /// nothing.
-  void setMaximizable(bool maximizable) => _nativeJs.setMaximizable(maximizable);
+  void setMaximizable(bool maximizable) =>
+      _nativeJs.setMaximizable(maximizable);
 
   /// Returns whether the window can be manually maximized by user. On Linux always returns true.
   bool isMaximizable() => _nativeJs.isMaximizable();
 
   /// Sets whether the maximize/zoom window button toggles fullscreen mode or maximizes the window.
-  void setFullScreenable(bool fullscreenable) => _nativeJs.setFullScreenable(fullscreenable);
+  void setFullScreenable(bool fullscreenable) =>
+      _nativeJs.setFullScreenable(fullscreenable);
 
   /// Returns whether the maximize/zoom window button toggles fullscreen mode or maximizes the window.
   bool isFullScreenable() => _nativeJs.isFullScreenable();
@@ -627,7 +817,8 @@ class BrowserWindow extends EventEmitter {
   void center() => _nativeJs.center();
 
   /// Moves window to x and y.
-  void setPosition(int x, int y, [bool animate]) => _nativeJs.setPosition(x, y, animate);
+  void setPosition(int x, int y, [bool animate]) =>
+      _nativeJs.setPosition(x, y, animate);
 
   /// Returns an array that contains window’s current position.
   List<int> getPosition() => _nativeJs.getPosition();
@@ -648,7 +839,8 @@ class BrowserWindow extends EventEmitter {
   ///
   ///     let toolbarRect = document.getElementById('toolbar').getBoundingClientRect()
   ///     win.setSheetOffset(toolbarRect.height)
-  void setSheetOffset(double offsetY, [double offsetX]) => _nativeJs.setSheetOffset(offsetY, offsetX);
+  void setSheetOffset(double offsetY, [double offsetX]) =>
+      _nativeJs.setSheetOffset(offsetY, offsetX);
 
   /// Starts or stops flashing the window to attract user’s attention.
   void flashFrame(bool flag) => _nativeJs.flashFrame(flag);
@@ -668,19 +860,23 @@ class BrowserWindow extends EventEmitter {
   Buffer getNativeWindowHandle() => _nativeJs.getNativeWindowHandle();
 
   /// Hooks a windows message. The callback is called when the message is received in the WndProc.
-  bool hookWindowMessage(int message, Function callback) => _nativeJs.hookWindowMessage(message, callback);
+  bool hookWindowMessage(int message, Function callback) =>
+      _nativeJs.hookWindowMessage(message, callback);
 
   /// Returns true or false depending on whether the message is hooked.
-  bool isWindowMessageHooked(int message) => _nativeJs.isWindowMessageHooked(message);
+  bool isWindowMessageHooked(int message) =>
+      _nativeJs.isWindowMessageHooked(message);
 
   /// Unhook the window message.
-  void unhookWindowMessage(int message) => _nativeJs.unhookWindowMessage(message);
+  void unhookWindowMessage(int message) =>
+      _nativeJs.unhookWindowMessage(message);
 
   /// Unhooks all of the window messages.
   void unhookAllWindowMessages() => _nativeJs.unhookAllWindowMessages();
 
   /// Sets the pathname of the file the window represents, and the icon of the file will show in window’s title bar.
-  void setRepresentedFilename(String filename) => _nativeJs.setRepresentedFilename(filename);
+  void setRepresentedFilename(String filename) =>
+      _nativeJs.setRepresentedFilename(filename);
 
   /// Returns the pathname of the file the window represents.
   String getRepresentedFilename() => _nativeJs.getRepresentedFilename();
@@ -697,7 +893,8 @@ class BrowserWindow extends EventEmitter {
 
   /// Same as webContents.capturePage([rect, ]callback).
   /// rect (optional) - The area of the page to be captured
-  void capturePage(Bounds rect, Function callback) => _nativeJs.capturePage(rect, callback);
+  void capturePage(Bounds rect, Function callback) =>
+      _nativeJs.capturePage(rect, callback);
 
   /// Same as webContents.loadURL(url[, options]).
   ///
@@ -712,7 +909,8 @@ class BrowserWindow extends EventEmitter {
   ///  })
   ///
   /// win.loadURL(url)
-  void loadURL(String url, [LoadURLOptions options]) => _nativeJs.loadURL(url, options);
+  void loadURL(String url, [LoadURLOptions options]) =>
+      _nativeJs.loadURL(url, options);
 
   /// Same as webContents.reload.
   void reload() => _nativeJs.reload();
@@ -727,11 +925,13 @@ class BrowserWindow extends EventEmitter {
   /// On Linux platform, only supports Unity desktop environment, you need to specify the *.desktop file name to desktopName field in package.json. By default, it will assume app.getName().desktop.
   ///
   /// On Windows, a mode can be passed. Accepted values are none, normal, indeterminate, error, and paused. If you call setProgressBar without a mode set (but with a value within the valid range), normal will be assumed.
-  void setProgressBar(double progress, [ProgressBarOptions options]) => _nativeJs.setProgressBar(progress, options);
+  void setProgressBar(double progress, [ProgressBarOptions options]) =>
+      _nativeJs.setProgressBar(progress, options);
 
   /// Sets a 16 x 16 pixel overlay onto the current taskbar icon, usually used to
   /// convey some sort of application status or to passively notify the user.
-  void setOverlayIcon(NativeImage overlay, String description) => _nativeJs.setOverlayIcon(overlay.nativeJs, description);
+  void setOverlayIcon(NativeImage overlay, String description) =>
+      _nativeJs.setOverlayIcon(overlay.nativeJs, description);
 
   /// Sets whether the window should have a shadow. On Windows and Linux does nothing.
   void setHasShadow(bool hasShadow) => _nativeJs.setHasShadow(hasShadow);
@@ -747,7 +947,8 @@ class BrowserWindow extends EventEmitter {
   /// to the limited room. Once you setup the thumbnail toolbar, the toolbar
   /// cannot be removed due to the platform’s limitation. But you can call the
   /// API with an empty array to clean the buttons.
-  bool setThumbarButtons(List<Button> buttons) => _nativeJs.setThumbarButtons(buttons);
+  bool setThumbarButtons(List<Button> buttons) =>
+      _nativeJs.setThumbarButtons(buttons);
 
   /// Sets the region of the window to show as the thumbnail image displayed when
   /// hovering over the window in the taskbar. You can reset the thumbnail to be
@@ -756,7 +957,8 @@ class BrowserWindow extends EventEmitter {
 
   /// Sets the toolTip that is displayed when hovering over the window thumbnail
   /// in the taskbar.
-  bool setThumbnailToolTip(String toolTip) => _nativeJs.setThumbnailToolTip(toolTip);
+  bool setThumbnailToolTip(String toolTip) =>
+      _nativeJs.setThumbnailToolTip(toolTip);
 
   /// Same as webContents.showDefinitionForSelection().
   void showDefinitionForSelection() => _nativeJs.showDefinitionForSelection();
@@ -776,7 +978,8 @@ class BrowserWindow extends EventEmitter {
 
   /// Sets whether the menu bar should be visible. If the menu bar is auto-hide,
   /// users can still bring up the menu bar by pressing the single Alt key.
-  void setMenuBarVisibility(bool visible) => _nativeJs.setMenuBarVisibility(visible);
+  void setMenuBarVisibility(bool visible) =>
+      _nativeJs.setMenuBarVisibility(visible);
 
   /// Returns whether the menu bar is visible.
   bool isMenuBarVisible() => _nativeJs.isMenuBarVisible();
@@ -784,7 +987,8 @@ class BrowserWindow extends EventEmitter {
   /// Sets whether the window should be visible on all workspaces.
   ///
   /// Note: This API does nothing on Windows.
-  void setVisibleOnAllWorkspaces(bool visible) => _nativeJs.setVisibleOnAllWorkspaces(visible);
+  void setVisibleOnAllWorkspaces(bool visible) =>
+      _nativeJs.setVisibleOnAllWorkspaces(visible);
 
   /// Returns whether the window is visible on all workspaces.
   ///
@@ -795,20 +999,23 @@ class BrowserWindow extends EventEmitter {
   ///
   /// All mouse events happened in this window will be passed to the window below
   /// this window, but if this window has focus, it will still receive keyboard events.
-  void setIgnoreMouseEvents(bool ignore) => _nativeJs.setIgnoreMouseEvents(ignore);
+  void setIgnoreMouseEvents(bool ignore) =>
+      _nativeJs.setIgnoreMouseEvents(ignore);
 
   /// Prevents the window contents from being captured by other apps.
   ///
   /// On macOS it sets the NSWindow’s sharingType to NSWindowSharingNone. On Windows
   /// it calls SetWindowDisplayAffinity with WDA_MONITOR.
-  void setContentProtection(bool enable) => _nativeJs.setContentProtection(enable);
+  void setContentProtection(bool enable) =>
+      _nativeJs.setContentProtection(enable);
 
   /// Changes whether the window can be focused.
   void setFocusable(bool focusable) => _nativeJs.setFocusable(focusable);
 
   /// Sets parent as current window’s parent window, passing null will turn current
   /// window into a top-level window.
-  void setParentWindow(BrowserWindow parent) => _nativeJs.setParentWindow(parent._nativeJs);
+  void setParentWindow(BrowserWindow parent) =>
+      _nativeJs.setParentWindow(parent._nativeJs);
 
   /// Returns the parent window.
   BrowserWindow getParentWindow() => _nativeJs.getParentWindow();
