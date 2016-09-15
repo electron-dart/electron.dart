@@ -3,7 +3,7 @@ library electron.main.accelerator;
 
 import "package:js/js.dart";
 
-@JS()
+@JS('_electron.Accelerator')
 class Accelerator {
   //TODO
 }

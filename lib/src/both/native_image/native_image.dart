@@ -16,7 +16,7 @@ external NativeImage createFromBuffer(Buffer buffer, [double scaleFactor]);
 @JS()
 external NativeImage createFromDataURL(String dataURL);
 
-@JS()
+@JS('_electron.NativeImage')
 class NativeImage {
   external Buffer toPNG();
 

@@ -62,7 +62,7 @@ class MenuItemOptions {
   external String get position;
 }
 
-@JS()
+@JS('_electron.MenuItem')
 class MenuItem {
   external MenuItem(MenuItemOptions options);
 

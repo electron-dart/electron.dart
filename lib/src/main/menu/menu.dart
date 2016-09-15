@@ -9,7 +9,7 @@ import 'package:electron/src/main/browser_window/browser_window.dart';
 
 part 'menuItem.dart';
 
-@JS()
+@JS('_electron.Menu')
 class Menu {
   /// Creates a new menu.
   external Menu();
