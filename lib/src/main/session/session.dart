@@ -1,7 +1,7 @@
 // Copyright (c) 2016, electron.dart. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-@JS('_electron.session')
+@JS()
 library electron.main.session;
 
 import "package:js/js.dart";
@@ -27,11 +27,11 @@ class SessionOptions {
 /// To create a Session with options, you have to ensure the Session with the
 /// partition has never been used before. There is no way to change the options
 /// of an existing Session object.
-@JS()
+@JS('_electron.session.fromPartition')
 external Session fromPartition(String partition, [SessionOptions options]);
 
 
-@JS()
+@JS('_electron.session.defaultSession')
 external Session get defaultSession;
 
 @JS('_electron.Session')

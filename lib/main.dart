@@ -7,8 +7,16 @@
 
 library electron;
 
+//Common exports
+export 'package:electron/src/main/geometry/geometry.dart';
+export 'package:electron/src/main/native_image/native_image.dart';
+
+// Main process export
+export 'package:electron/src/main/accelerator/accelerator.dart';
 export 'package:electron/src/main/app/app.dart';
 export 'package:electron/src/main/browser_window/browser_window.dart';
+export 'package:electron/src/main/menu/menu.dart';
+export 'package:electron/src/main/session/session.dart';
 
 
 
