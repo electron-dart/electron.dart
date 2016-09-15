@@ -8,9 +8,10 @@ import "dart:async";
 import "package:js/js.dart";
 import "package:nodejs/nodejs.dart";
 
-import 'package:electron/src/main/native_image/native_image.dart';
+import 'package:electron/src/both/native_image/native_image.dart';
 import 'package:electron/src/main/menu/menu.dart';
 import 'package:electron/src/main/session/session.dart';
+import 'package:electron/src/main/web_contents/web_contents.dart';
 
 part 'options.dart';
 part 'web_preferences_option.dart';
@@ -58,6 +59,16 @@ class ProgressBarOptions {
 
 @JS()
 @anonymous
+class DevToolsExtensionsInfo {
+  external const factory DevToolsExtensionsInfo({String name, String version});
+
+  external String get name;
+
+  external String get version;
+}
+
+@JS()
+@anonymous
 class Button {
   /// The icon showing in thumbnail toolbar.
   external NativeImage get icon;
@@ -80,6 +91,53 @@ class Button {
 @JS('_electron.BrowserWindow')
 class NativeJsBrowserWindow extends NativeJsEventEmitter {
   external factory NativeJsBrowserWindow([BrowserWindowOptions options]);
+
+  /// Returns an array of all opened browser windows.
+  external static List<NativeJsBrowserWindow> getAllWindows();
+
+  /// Returns the window that is focused in this application, otherwise returns null.
+  external static NativeJsBrowserWindow getFocusedWindow();
+
+  /// Find a window according to the webContents it owns.
+  external static NativeJsBrowserWindow fromWebContents(
+      NativeJsWebContents webContents);
+
+  /// Find a window according to its ID.
+  external static NativeJsBrowserWindow fromId(int id);
+
+  /// Adds DevTools extension located at path, and returns extension’s name.
+  /// The extension will be remembered so you only need to call this API once,
+  /// this API is not for programming use. If you try to add an extension that
+  /// has already been loaded, this method will not return and instead log a
+  /// warning to the console.
+  ///
+  /// The method will also not return if the extension’s manifest is missing or incomplete.
+  ///
+  /// Note: This API cannot be called before the ready event of the app module is emitted.
+  external static String addDevToolsExtension(String path);
+
+  /// Remove a DevTools extension by name.
+  ///
+  /// Note: This API cannot be called before the ready event of the app module is emitted.
+  external static void removeDevToolsExtension(String name);
+
+  ///  Returns an Object where the keys are the extension names and each value is an Object containing name and version properties.
+  ///
+  /// To check if a DevTools extension is installed you can run the following:
+  ///
+  /// const {BrowserWindow} = require('electron')
+  ///
+  /// let installed = BrowserWindow.getDevToolsExtensions().hasOwnProperty('devtron')
+  /// console.log(installed)
+  /// Note: This API cannot be called before the ready event of the app module is emitted.
+  external static Map<String, DevToolsExtensionsInfo> getDevToolsExtensions();
+
+  /// The WebContents object this window owns. All web page related events and
+  /// operations will be done via it.
+  external NativeJsWebContents get webContents;
+
+  /// The unique ID of the window.
+  external int get id;
 
   /// Force closing the window, the unload and beforeunload event won’t be emitted
   /// for the web page, and close event will also not be emitted for this window,
@@ -455,7 +513,7 @@ class EventEmitterGlue<T> {
     }
   }
 
-  void defConverter([a, b, c, d]) {
+  void defConverter([dynamic a, dynamic b, dynamic c, dynamic d]) {
     add();
   }
 
@@ -481,7 +539,7 @@ class BrowserWindow extends EventEmitter {
       : super.fromNativeJsEventEmitter(window) {
     _nativeJs = window;
 
-    _initAllStreamController();
+    _initAllEventStreams();
   }
 
   NativeJsBrowserWindow _nativeJs;
@@ -588,7 +646,7 @@ class BrowserWindow extends EventEmitter {
 
   Stream<Null> get onSwipe => _swipe.stream;
 
-  void _initAllStreamController() {
+  void _initAllEventStreams() {
     _pageTitleUpdated = new EventEmitterGlue<Null>(this, "page-title-updated",
         (dynamic a1, dynamic a2) => _pageTitleUpdated.add());
 
@@ -628,9 +686,11 @@ class BrowserWindow extends EventEmitter {
 
     _leaveFullScreen = new EventEmitterGlue<Null>(this, "leave-full-screen");
 
-    _enterHtmlFullScreen = new EventEmitterGlue<Null>(this, "enter-html-full-screen");
+    _enterHtmlFullScreen =
+        new EventEmitterGlue<Null>(this, "enter-html-full-screen");
 
-    _leaveHtmlFullScreen = new EventEmitterGlue<Null>(this, "leave-html-full-screen");
+    _leaveHtmlFullScreen =
+        new EventEmitterGlue<Null>(this, "leave-html-full-screen");
 
     _appCommand = new EventEmitterGlue<Null>(this, "app-command");
 
@@ -640,6 +700,64 @@ class BrowserWindow extends EventEmitter {
 
     _swipe = new EventEmitterGlue<Null>(this, "swipe");
   }
+
+  /// Returns an array of all opened browser windows.
+  static List<BrowserWindow> getAllWindows() =>
+      NativeJsBrowserWindow.getAllWindows().map((NativeJsBrowserWindow window) {
+        return new BrowserWindow.fromNativeJsBrowserWindow(window);
+      }).toList();
+
+  /// Returns the window that is focused in this application, otherwise returns null.
+  static BrowserWindow getFocusedWindow() =>
+      new BrowserWindow.fromNativeJsBrowserWindow(
+          NativeJsBrowserWindow.getFocusedWindow());
+
+  /// Find a window according to the webContents it owns.
+  static BrowserWindow fromWebContents(WebContents webContents) =>
+      new BrowserWindow.fromNativeJsBrowserWindow(
+          NativeJsBrowserWindow.fromWebContents(webContents.nativeJs));
+
+  /// Find a window according to its ID.
+  static BrowserWindow fromId(int id) =>
+      new BrowserWindow.fromNativeJsBrowserWindow(
+          NativeJsBrowserWindow.fromId(id));
+
+  /// Adds DevTools extension located at path, and returns extension’s name.
+  /// The extension will be remembered so you only need to call this API once,
+  /// this API is not for programming use. If you try to add an extension that
+  /// has already been loaded, this method will not return and instead log a
+  /// warning to the console.
+  ///
+  /// The method will also not return if the extension’s manifest is missing or incomplete.
+  ///
+  /// Note: This API cannot be called before the ready event of the app module is emitted.
+  static String addDevToolsExtension(String path) =>
+      NativeJsBrowserWindow.addDevToolsExtension(path);
+
+  /// Remove a DevTools extension by name.
+  ///
+  /// Note: This API cannot be called before the ready event of the app module is emitted.
+  static void removeDevToolsExtension(String name) =>
+      NativeJsBrowserWindow.removeDevToolsExtension(name);
+
+  ///  Returns an Object where the keys are the extension names and each value is an Object containing name and version properties.
+  ///
+  /// To check if a DevTools extension is installed you can run the following:
+  ///
+  /// const {BrowserWindow} = require('electron')
+  ///
+  /// let installed = BrowserWindow.getDevToolsExtensions().hasOwnProperty('devtron')
+  /// console.log(installed)
+  /// Note: This API cannot be called before the ready event of the app module is emitted.
+  static Map<String, DevToolsExtensionsInfo> getDevToolsExtensions() =>
+      NativeJsBrowserWindow.getDevToolsExtensions();
+
+  /// The WebContents object this window owns. All web page related events and
+  /// operations will be done via it.
+  WebContents get webContents => new WebContents.fromNativeJsWebContent(_nativeJs.webContents);
+
+  /// The unique ID of the window.
+  int get id => _nativeJs.id;
 
   /// Force closing the window, the unload and beforeunload event won’t be emitted
   /// for the web page, and close event will also not be emitted for this window,

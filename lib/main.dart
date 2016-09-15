@@ -5,11 +5,12 @@
 ///
 /// More dartdocs go here.
 
-library electron;
+library electron.main;
 
 //Common exports
+export 'package:electron/src/both/clipboard/clipboard.dart';
 export 'package:electron/src/main/geometry/geometry.dart';
-export 'package:electron/src/main/native_image/native_image.dart';
+export 'package:electron/src/both/native_image/native_image.dart';
 
 // Main process export
 export 'package:electron/src/main/accelerator/accelerator.dart';
