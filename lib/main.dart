@@ -16,8 +16,10 @@ export 'package:electron/src/both/native_image/native_image.dart';
 export 'package:electron/src/main/accelerator/accelerator.dart';
 export 'package:electron/src/main/app/app.dart';
 export 'package:electron/src/main/browser_window/browser_window.dart';
+export 'package:electron/src/main/web_contents/web_contents.dart';
 export 'package:electron/src/main/menu/menu.dart';
 export 'package:electron/src/main/session/session.dart';
+export 'package:electron/src/main/ipc/ipc.dart';
 
 
 

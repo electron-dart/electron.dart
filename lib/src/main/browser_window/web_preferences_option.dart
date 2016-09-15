@@ -30,7 +30,7 @@ class WebPreferencesOption {
       {bool devTools,
       bool nodeIntegration,
       String preload,
-      Session session,
+      NativeJsSession session,
       String partition,
       num zoomFactor,
       bool javascript,
@@ -76,7 +76,7 @@ class WebPreferencesOption {
   /// directly, you can also choose to use the partition option instead, which
   /// accepts a partition string. When both session and partition are provided,
   /// session will be preferred. Default is the default session.
-  external Session get session;
+  external NativeJsSession get session;
 
   /// Sets the session used by the page according to the session’s partition string. If partition starts with persist:, the page will use a persistent session available to all pages in the app with the same partition. If there is no persist: prefix, the page will use an in-memory session. By assigning the same partition, multiple pages can share the same session. Default is the default session.
   external String get partition;

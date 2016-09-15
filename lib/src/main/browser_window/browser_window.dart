@@ -39,19 +39,6 @@ class Bounds {
 
 @JS()
 @anonymous
-class LoadURLOptions {
-  /// A HTTP Referrer url.
-  String httpReferrer;
-
-  /// A user agent originating the request.
-  String userAgent;
-
-  /// Extra headers separated by “\n”
-  String extraHeaders;
-}
-
-@JS()
-@anonymous
 class ProgressBarOptions {
   /// Mode for the progres bar (none, normal, indeterminate, error, or paused)
   String mode;

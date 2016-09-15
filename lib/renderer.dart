@@ -13,11 +13,10 @@ import "package:nodejs/nodejs.dart";
 
 //Common exports
 export 'package:electron/src/both/clipboard/clipboard.dart';
-export 'package:electron/src/main/geometry/geometry.dart';
 export 'package:electron/src/both/native_image/native_image.dart';
 
 // Main process export
-//TODO
+export 'package:electron/src/renderer/ipc/ipc.dart';
 
 @JS('_electron')
 external NativeJsObject get _electron;
