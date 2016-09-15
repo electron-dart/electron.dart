@@ -2,7 +2,7 @@ name: electron
 version: 0.0.3+1
 description: Electron wrapper for dart
 author: electron.dart
-homepage: https://gitlab.com/grimshield/electron.dart
+homepage: https://github.com/electron-dart/electron.dart
 
 environment:
   sdk: '>=1.0.0 <2.0.0'
