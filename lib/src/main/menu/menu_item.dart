@@ -17,7 +17,7 @@ class MenuItemOptions {
       bool enabled,
       bool visible,
       bool checked,
-      Menu submenu,
+      NativeJsMenu submenu,
       String id,
       String position});
 
@@ -56,7 +56,7 @@ class MenuItemOptions {
   /// Should be specified for submenu type menu items. If submenu is specified,
   /// the type: 'submenu' can be omitted. If the value is not a Menu then it
   /// will be automatically converted to one using Menu.buildFromTemplate.
-  external Menu get submenu;
+  external NativeJsMenu get submenu;
 
   /// Unique within a single menu. If defined then it can be used as a reference to this item by the position attribute.
   external String get id;
@@ -66,8 +66,8 @@ class MenuItemOptions {
 }
 
 @JS('_electron.MenuItem')
-class MenuItem {
-  external MenuItem(MenuItemOptions options);
+class NativeJsMenuItem {
+  external NativeJsMenuItem(MenuItemOptions options);
 
   /// A Boolean indicating whether the item is enabled, this property can be dynamically changed.
   external bool get enabled;
@@ -83,4 +83,33 @@ class MenuItem {
   ///
   /// You can add a click function for additional behavior.
   external bool get checked;
+}
+
+class MenuItem {
+  MenuItem(MenuItemOptions options) {
+    _nativeJs = new NativeJsMenuItem(options);
+  }
+
+  MenuItem.fromNativeJsMenuItem(NativeJsMenuItem item) {
+    _nativeJs = item;
+  }
+
+  NativeJsMenuItem _nativeJs;
+
+  NativeJsMenuItem get nativeJs => _nativeJs;
+
+  /// A Boolean indicating whether the item is enabled, this property can be dynamically changed.
+  bool get enabled => _nativeJs.enabled;
+
+  /// A Boolean indicating whether the item is visible, this property can be dynamically changed.
+  bool get visible => _nativeJs.visible;
+
+  /// A Boolean indicating whether the item is checked, this property can be dynamically changed.
+  ///
+  /// A checkbox menu item will toggle the checked property on and off when selected.
+  ///
+  /// A radio menu item will turn on its checked property when clicked, and will turn off that property for all adjacent items in the same menu.
+  ///
+  /// You can add a click function for additional behavior.
+  bool get checked => _nativeJs.checked;
 }
