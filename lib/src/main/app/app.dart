@@ -55,7 +55,7 @@ class App extends EventEmitter {
 
   void _onWindowAllClosed([dynamic event]) => _windowAllClosed.add(null);
 
-  void _onReady([a, b, c, d]) => _ready.add(null);
+  void _onReady([dynamic a, dynamic b, dynamic c, dynamic d]) => _ready.add(null);
 }
 
 App _getApp() {

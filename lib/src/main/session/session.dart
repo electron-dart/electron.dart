@@ -28,13 +28,19 @@ class SessionOptions {
 /// partition has never been used before. There is no way to change the options
 /// of an existing Session object.
 @JS('_electron.session.fromPartition')
-external Session fromPartition(String partition, [SessionOptions options]);
+external NativeJsSession _fromPartition(String partition, [SessionOptions options]);
 
 
 @JS('_electron.session.defaultSession')
-external Session get defaultSession;
+external NativeJsSession get _defaultSession;
 
 @JS('_electron.Session')
-class Session {
+class NativeJsSession {
   //TODO
+}
+
+class Session {
+  NativeJsSession _nativeJs;
+
+  NativeJsSession get nativeJs => _nativeJs;
 }

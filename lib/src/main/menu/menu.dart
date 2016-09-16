@@ -6,7 +6,7 @@ library electron.main.menu;
 
 import "package:js/js.dart";
 
-import 'package:electron/src/main/native_image/native_image.dart';
+import 'package:electron/src/both/native_image/native_image.dart';
 import 'package:electron/src/main/accelerator/accelerator.dart';
 import 'package:electron/src/main/browser_window/browser_window.dart';
 
