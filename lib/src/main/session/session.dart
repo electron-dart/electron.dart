@@ -30,7 +30,6 @@ class SessionOptions {
 @JS('_electron.session.fromPartition')
 external NativeJsSession _fromPartition(String partition, [SessionOptions options]);
 
-
 @JS('_electron.session.defaultSession')
 external NativeJsSession get _defaultSession;
 

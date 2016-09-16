@@ -2,13 +2,16 @@
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
 @JS()
-library electron.browser_window;
+library electron.main.browser_window;
 
+import 'dart:math';
 import "dart:async";
 import "package:js/js.dart";
 import "package:nodejs/nodejs.dart";
 
 import 'package:electron/src/both/native_image/native_image.dart';
+import 'package:electron/src/both/geometry/geometry.dart';
+
 import 'package:electron/src/main/menu/menu.dart';
 import 'package:electron/src/main/session/session.dart';
 import 'package:electron/src/main/web_contents/web_contents.dart';
@@ -23,17 +26,6 @@ class AspectRatioExtraSize {
 
   external int get width;
 
-  external int get height;
-}
-
-@JS()
-@anonymous
-class Bounds {
-  external const factory Bounds({int x, int y, int width, int height});
-
-  external int get x;
-  external int get y;
-  external int get width;
   external int get height;
 }
 
@@ -207,17 +199,17 @@ class NativeJsBrowserWindow extends NativeJsEventEmitter {
       [AspectRatioExtraSize extraSize]);
 
   /// Resizes and moves the window to width, height, x, y.
-  external void setBounds(Bounds options, [bool animate]);
+  external void setBounds(NativeJsBounds options, [bool animate]);
 
   /// Returns an object that contains window’s width, height, x and y values.
-  external Bounds getBounds();
+  external NativeJsBounds getBounds();
 
   /// Resizes and moves the window’s client area (e.g. the web page) to width, height, x, y.
-  external void setContentBounds(Bounds options, [bool animate]);
+  external void setContentBounds(NativeJsBounds options, [bool animate]);
 
   /// Returns an object that contains the window’s client area (e.g. the web page)
   /// width, height, x and y values.
-  external Bounds getContentBounds();
+  external NativeJsBounds getContentBounds();
 
   /// Resizes the window to width and height.
   external void setSize(int width, int height, [bool animate]);
@@ -363,7 +355,7 @@ class NativeJsBrowserWindow extends NativeJsEventEmitter {
 
   /// Same as webContents.capturePage([rect, ]callback).
   /// rect (optional) - The area of the page to be captured
-  external void capturePage(Bounds rect, Function callback);
+  external void capturePage(NativeJsBounds rect, Function callback);
 
   /// Same as webContents.loadURL(url[, options]).
   ///
@@ -418,7 +410,7 @@ class NativeJsBrowserWindow extends NativeJsEventEmitter {
   /// Sets the region of the window to show as the thumbnail image displayed when
   /// hovering over the window in the taskbar. You can reset the thumbnail to be
   /// the entire window by specifying an empty region: {x: 0, y: 0, width: 0, height: 0}.
-  external bool setThumbnailClip(Bounds region);
+  external bool setThumbnailClip(NativeJsBounds region);
 
   /// Sets the toolTip that is displayed when hovering over the window thumbnail
   /// in the taskbar.
@@ -477,15 +469,16 @@ class NativeJsBrowserWindow extends NativeJsEventEmitter {
   external void setParentWindow(NativeJsBrowserWindow parent);
 
   /// Returns the parent window.
-  external BrowserWindow getParentWindow();
+  external NativeJsBrowserWindow getParentWindow();
 
   /// Returns all child windows.
-  external List<BrowserWindow> getChildWindows();
+  external List<NativeJsBrowserWindow> getChildWindows();
 }
 
 const BrowserWindowOptions defaultBrowserWindowOptions =
     const BrowserWindowOptions();
 
+/*
 class EventEmitterGlue<T> {
   EventEmitter _emitter;
 
@@ -514,6 +507,7 @@ class EventEmitterGlue<T> {
 
   Stream<T> get stream => _controller.stream;
 }
+*/
 
 class BrowserWindow extends EventEmitter {
   factory BrowserWindow(
@@ -741,7 +735,8 @@ class BrowserWindow extends EventEmitter {
 
   /// The WebContents object this window owns. All web page related events and
   /// operations will be done via it.
-  WebContents get webContents => new WebContents.fromNativeJsWebContent(_nativeJs.webContents);
+  WebContents get webContents =>
+      new WebContents.fromNativeJsWebContent(_nativeJs.webContents);
 
   /// The unique ID of the window.
   int get id => _nativeJs.id;
@@ -827,19 +822,19 @@ class BrowserWindow extends EventEmitter {
       _nativeJs.setAspectRatio(aspectRatio, extraSize);
 
   /// Resizes and moves the window to width, height, x, y.
-  void setBounds(Bounds options, [bool animate]) =>
-      _nativeJs.setBounds(options, animate);
+  void setBounds(Rectangle<int> options, [bool animate]) =>
+      _nativeJs.setBounds(rectToJs(options), animate);
 
   /// Returns an object that contains window’s width, height, x and y values.
-  Bounds getBounds() => _nativeJs.getBounds();
+  Rectangle<int> getBounds() => rectFromJs(_nativeJs.getBounds());
 
   /// Resizes and moves the window’s client area (e.g. the web page) to width, height, x, y.
-  void setContentBounds(Bounds options, [bool animate]) =>
-      _nativeJs.setContentBounds(options, animate);
+  void setContentBounds(Rectangle<int> options, [bool animate]) =>
+      _nativeJs.setContentBounds(rectToJs(options), animate);
 
   /// Returns an object that contains the window’s client area (e.g. the web page)
   /// width, height, x and y values.
-  Bounds getContentBounds() => _nativeJs.getContentBounds();
+  Rectangle<int> getContentBounds() => rectFromJs(_nativeJs.getContentBounds());
 
   /// Resizes the window to width and height.
   void setSize(int width, int height, [bool animate]) =>
@@ -998,8 +993,8 @@ class BrowserWindow extends EventEmitter {
 
   /// Same as webContents.capturePage([rect, ]callback).
   /// rect (optional) - The area of the page to be captured
-  void capturePage(Bounds rect, Function callback) =>
-      _nativeJs.capturePage(rect, callback);
+  void capturePage(Rectangle<int> rect, Function callback) =>
+      _nativeJs.capturePage(rectToJs(rect), callback);
 
   /// Same as webContents.loadURL(url[, options]).
   ///
@@ -1058,7 +1053,8 @@ class BrowserWindow extends EventEmitter {
   /// Sets the region of the window to show as the thumbnail image displayed when
   /// hovering over the window in the taskbar. You can reset the thumbnail to be
   /// the entire window by specifying an empty region: {x: 0, y: 0, width: 0, height: 0}.
-  bool setThumbnailClip(Bounds region) => _nativeJs.setThumbnailClip(region);
+  bool setThumbnailClip(Rectangle<int> region) =>
+      _nativeJs.setThumbnailClip(rectToJs(region));
 
   /// Sets the toolTip that is displayed when hovering over the window thumbnail
   /// in the taskbar.
@@ -1123,8 +1119,13 @@ class BrowserWindow extends EventEmitter {
       _nativeJs.setParentWindow(parent._nativeJs);
 
   /// Returns the parent window.
-  BrowserWindow getParentWindow() => _nativeJs.getParentWindow();
+  BrowserWindow getParentWindow() =>
+      new BrowserWindow.fromNativeJsBrowserWindow(_nativeJs.getParentWindow());
 
   /// Returns all child windows.
-  List<BrowserWindow> getChildWindows() => _nativeJs.getChildWindows();
+  List<BrowserWindow> getChildWindows() => _nativeJs
+      .getChildWindows()
+      .map((NativeJsBrowserWindow window) =>
+          new BrowserWindow.fromNativeJsBrowserWindow(window))
+      .toList();
 }

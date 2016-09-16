@@ -8,6 +8,7 @@ import "package:js/js.dart";
 
 import 'package:electron/src/main/web_contents/web_contents.dart';
 
+/* TODO
 @JS()
 class IpcEvent {
   //TODO external const factory({});
@@ -22,6 +23,7 @@ class IpcEvent {
   /// webContents.send for more information.
   external WebContents get sender;
 }
+*/
 
 /// Listens to channel, when a new message arrives listener would be called
 /// with listener(event, args...).

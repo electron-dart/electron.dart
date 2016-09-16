@@ -7,7 +7,7 @@ library electron.both.native_image;
 import "package:js/js.dart";
 import "package:nodejs/nodejs.dart";
 
-import "package:electron/src/main/geometry/geometry.dart";
+import "package:electron/src/both/geometry/geometry.dart";
 
 @JS('_electron.nativeImage.createEmpty')
 external NativeJsNativeImage _createEmpty();

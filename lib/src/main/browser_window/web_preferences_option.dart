@@ -1,7 +1,7 @@
 // Copyright (c) 2016, electron.dart. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-part of electron.browser_window;
+part of electron.main.browser_window;
 
 /// Options to request default font for the font-family.
 @JS()
