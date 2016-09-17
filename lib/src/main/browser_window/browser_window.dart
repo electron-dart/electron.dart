@@ -478,37 +478,6 @@ class NativeJsBrowserWindow extends NativeJsEventEmitter {
 const BrowserWindowOptions defaultBrowserWindowOptions =
     const BrowserWindowOptions();
 
-/*
-class EventEmitterGlue<T> {
-  EventEmitter _emitter;
-
-  StreamController<T> _controller;
-
-  EventEmitterGlue(this._emitter, String event, [Function callback]) {
-    _controller = new StreamController<T>(sync: true);
-    if (callback is Function) {
-      _emitter.on(event, callback);
-    } else {
-      _emitter.on(event, defConverter);
-    }
-  }
-
-  void defConverter([dynamic a, dynamic b, dynamic c, dynamic d]) {
-    add();
-  }
-
-  void add([T el]) {
-    _controller.add(el);
-  }
-
-  Future<Null> destroy() async {
-    await _controller.close();
-  }
-
-  Stream<T> get stream => _controller.stream;
-}
-*/
-
 class BrowserWindow extends EventEmitter {
   factory BrowserWindow(
       [BrowserWindowOptions options = defaultBrowserWindowOptions]) {
@@ -961,7 +930,7 @@ class BrowserWindow extends EventEmitter {
 
   /// Hooks a windows message. The callback is called when the message is received in the WndProc.
   bool hookWindowMessage(int message, Function callback) =>
-      _nativeJs.hookWindowMessage(message, callback);
+      _nativeJs.hookWindowMessage(message, allowInterop(callback));
 
   /// Returns true or false depending on whether the message is hooked.
   bool isWindowMessageHooked(int message) =>
@@ -993,8 +962,13 @@ class BrowserWindow extends EventEmitter {
 
   /// Same as webContents.capturePage([rect, ]callback).
   /// rect (optional) - The area of the page to be captured
-  void capturePage(Rectangle<int> rect, Function callback) =>
-      _nativeJs.capturePage(rectToJs(rect), callback);
+  void capturePage(Rectangle<int> rect, Function callback) {
+    NativeJsBounds rectJs;
+    if(rect is Rectangle<int>) {
+      rectJs = rectToJs(rect);
+    }
+    _nativeJs.capturePage(rectJs, allowInterop(callback));
+  }
 
   /// Same as webContents.loadURL(url[, options]).
   ///

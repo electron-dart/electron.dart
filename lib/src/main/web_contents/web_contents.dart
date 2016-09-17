@@ -301,7 +301,7 @@ class WebContents extends EventEmitter {
 
   WebContents.fromNativeJsWebContent(NativeJsWebContents window)
       : super.fromNativeJsEventEmitter(window) {
-    _nativeJs = window;
+    _nativeJsWebContents = window;
 
     _initAllEventStreams();
   }
@@ -310,9 +310,9 @@ class WebContents extends EventEmitter {
     //TODO
   }
 
-  NativeJsWebContents _nativeJs;
+  NativeJsWebContents _nativeJsWebContents;
 
-  NativeJsWebContents get nativeJs => _nativeJs;
+  NativeJsWebContents get nativeJsWebContents => _nativeJsWebContents;
 
   //TODO
 }

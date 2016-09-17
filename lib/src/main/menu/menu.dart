@@ -103,7 +103,13 @@ class Menu {
   /// y - Default is the current mouse cursor position.
   /// positioningItem - The index of the menu item to be positioned under the
   /// mouse cursor at the specified coordinates. Default is -1.
-  void popup([BrowserWindow browserWindow, num x, num y, num positioningItem]) => _nativeJs.popup(browserWindow.nativeJs, x, y, positioningItem);
+  void popup([BrowserWindow browserWindow, num x, num y, num positioningItem]) {
+    NativeJsBrowserWindow native;
+    if(browserWindow is BrowserWindow) {
+      native = browserWindow.nativeJs;
+    }
+    _nativeJs.popup(native, x, y, positioningItem);
+  }
 
   /// Appends the menuItem to the menu.
   void append(MenuItem menuItem) => _nativeJs.append(menuItem.nativeJs);
