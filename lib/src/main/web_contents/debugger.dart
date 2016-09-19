@@ -12,8 +12,6 @@ class NativeJsDebugger {
 
   /// Detaches the debugger from the webContents.
   external void detach();
-
-  //TODO events
 }
 
 class Debugger {
@@ -24,4 +22,17 @@ class Debugger {
   }
 
   NativeJsDebugger get nativeJs => _nativeJs;
+
+  //TODO events
+
+  /// Attaches the debugger to the webContents.
+  ///
+  /// protocolVersion Requested debugging protocol version.
+  void attach([String protocolVersion]) => _nativeJs.attach(protocolVersion);
+
+  /// Returns a boolean indicating whether a debugger is attached to the webContents.
+  bool isAttached() => isAttached();
+
+  /// Detaches the debugger from the webContents.
+  void detach() => _nativeJs.detach();
 }

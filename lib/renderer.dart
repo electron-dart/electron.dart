@@ -14,6 +14,9 @@ import "package:nodejs/nodejs.dart";
 //Common exports
 export 'package:electron/src/both/clipboard/clipboard.dart';
 export 'package:electron/src/both/native_image/native_image.dart';
+export 'package:electron/src/both/process/process.dart';
+export 'package:electron/src/both/screen/screen.dart';
+export 'package:electron/src/both/shell/shell.dart';
 
 // Main process export
 export 'package:electron/src/renderer/ipc/ipc.dart';
